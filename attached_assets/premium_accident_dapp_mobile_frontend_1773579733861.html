@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>AcciChain Premium Mobile DApp</title>
+  <style>
+    :root {
+      --bg: #edf3ff;
+      --bg2: #dfeaff;
+      --card: rgba(255,255,255,0.38);
+      --card-strong: rgba(255,255,255,0.58);
+      --stroke: rgba(255,255,255,0.58);
+      --text: #10213f;
+      --muted: #63708b;
+      --blue: #4f7cff;
+      --blue2: #76a3ff;
+      --cyan: #76d6ff;
+      --violet: #8d7dff;
+      --success: #1fbf8f;
+      --warning: #ffb347;
+      --danger: #ff6b7c;
+      --shadow: 0 24px 60px rgba(73, 109, 171, .18);
+      --radius: 28px;
+      --radius-sm: 20px;
+      --blur: blur(24px);
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { margin: 0; height: 100%; font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background: radial-gradient(circle at top left, #ffffff 0%, var(--bg) 35%, var(--bg2) 100%); color: var(--text); overflow: hidden; }
+    body::before, body::after {
+      content: ""; position: fixed; inset: auto; border-radius: 50%; filter: blur(40px); z-index: 0; pointer-events: none;
+    }
+    body::before { width: 260px; height: 260px; top: -40px; left: -40px; background: rgba(118,214,255,.35); }
+    body::after { width: 320px; height: 320px; right: -80px; bottom: -80px; background: rgba(141,125,255,.18); }
+
+    .app-shell {
+      position: relative; z-index: 1; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; padding: 18px;
+    }
+
+    .phone {
+      width: 390px; max-width: 100%; height: 844px; max-height: calc(100vh - 36px); border-radius: 42px; padding: 12px; background: linear-gradient(180deg, rgba(255,255,255,.75), rgba(255,255,255,.28));
+      box-shadow: 0 30px 80px rgba(40,70,130,.28), inset 0 1px 0 rgba(255,255,255,.8); border: 1px solid rgba(255,255,255,.55); backdrop-filter: blur(16px); position: relative; overflow: hidden;
+    }
+
+    .phone::before {
+      content: ""; position: absolute; top: 8px; left: 50%; transform: translateX(-50%); width: 132px; height: 28px; border-radius: 20px; background: rgba(14, 23, 40, .85); z-index: 20;
+    }
+
+    .screen {
+      position: relative; width: 100%; height: 100%; overflow: hidden; border-radius: 34px; background: linear-gradient(180deg, rgba(255,255,255,.52), rgba(255,255,255,.18)); border: 1px solid rgba(255,255,255,.5);
+      backdrop-filter: blur(30px);
+    }
+
+    .view {
+      position: absolute; inset: 0; padding: 22px 18px 110px; overflow-y: auto; opacity: 0; transform: translateX(30px) scale(.98); pointer-events: none; transition: opacity .55s cubic-bezier(.2,.8,.2,1), transform .55s cubic-bezier(.2,.8,.2,1);
+      scroll-behavior: smooth;
+    }
+    .view.active { opacity: 1; transform: translateX(0) scale(1); pointer-events: auto; }
+    .view::-webkit-scrollbar { width: 0; }
+
+    .glass, .hero-card, .stat-card, .action-card, .timeline-card, .panel, .bottom-nav, .wallet-card, .media-card, .report-card, .cost-card, .decision-card {
+      background: linear-gradient(180deg, rgba(255,255,255,.58), rgba(255,255,255,.28));
+      border: 1px solid var(--stroke);
+      box-shadow: var(--shadow);
+      backdrop-filter: var(--blur);
+    }
+
+    .topbar { display: flex; align-items: center; justify-content: space-between; padding-top: 24px; margin-bottom: 18px; }
+    .topbar h1, .topbar h2, .topbar h3, p { margin: 0; }
+    .title { font-size: 28px; font-weight: 800; letter-spacing: -.03em; }
+    .subtitle { color: var(--muted); margin-top: 6px; font-size: 13px; line-height: 1.4; }
+
+    .icon-btn, .nav-btn, .seg-btn, .primary-btn, .ghost-btn, .fab, .chip, .small-btn {
+      border: 0; cursor: pointer; transition: transform .28s ease, box-shadow .28s ease, background .28s ease, opacity .28s ease;
+    }
+    .icon-btn:active, .nav-btn:active, .seg-btn:active, .primary-btn:active, .ghost-btn:active, .fab:active, .chip:active, .small-btn:active { transform: scale(.97); }
+
+    .icon-btn {
+      width: 46px; height: 46px; border-radius: 16px; display: grid; place-items: center; color: var(--text);
+      background: linear-gradient(180deg, rgba(255,255,255,.8), rgba(255,255,255,.44)); box-shadow: 0 14px 30px rgba(69,96,160,.16), inset 0 1px 0 rgba(255,255,255,.9);
+    }
+
+    .hero-card { padding: 18px; border-radius: 28px; position: relative; overflow: hidden; }
+    .hero-card::after {
+      content: ""; position: absolute; inset: auto -20px -30px auto; width: 180px; height: 180px; border-radius: 50%; background: radial-gradient(circle, rgba(118,214,255,.35), transparent 62%);
+    }
+
+    .hero-grid { display: grid; grid-template-columns: 1.2fr .8fr; gap: 14px; align-items: center; }
+    .hero-title { font-size: 24px; font-weight: 900; line-height: 1.05; letter-spacing: -.03em; }
+    .hero-text { color: var(--muted); margin-top: 10px; font-size: 13px; line-height: 1.5; }
+    .hero-actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+
+    .primary-btn {
+      padding: 14px 18px; border-radius: 18px; color: white; font-weight: 700; background: linear-gradient(135deg, var(--blue), var(--violet)); box-shadow: 0 18px 35px rgba(93,111,255,.35);
+    }
+    .ghost-btn {
+      padding: 14px 16px; border-radius: 18px; color: var(--text); font-weight: 700; background: rgba(255,255,255,.52); box-shadow: inset 0 1px 0 rgba(255,255,255,.92);
+    }
+
+    .wallet-card {
+      border-radius: 30px; padding: 16px; min-height: 210px; position: relative; overflow: hidden;
+      background: linear-gradient(145deg, rgba(255,255,255,.46), rgba(228,239,255,.45));
+    }
+    .wallet-cube {
+      width: 100px; height: 100px; margin: 8px auto 0; position: relative; transform-style: preserve-3d; animation: spinCube 10s linear infinite;
+    }
+    .wallet-cube span {
+      position: absolute; inset: 0; border-radius: 24px; background: linear-gradient(145deg, rgba(118,214,255,.8), rgba(141,125,255,.7)); border: 1px solid rgba(255,255,255,.65); box-shadow: inset 0 1px 14px rgba(255,255,255,.45);
+    }
+    .wallet-cube span:nth-child(1) { transform: translateZ(50px); }
+    .wallet-cube span:nth-child(2) { transform: rotateY(90deg) translateZ(50px); }
+    .wallet-cube span:nth-child(3) { transform: rotateY(180deg) translateZ(50px); }
+    .wallet-cube span:nth-child(4) { transform: rotateY(-90deg) translateZ(50px); }
+    .wallet-cube span:nth-child(5) { transform: rotateX(90deg) translateZ(50px); }
+    .wallet-cube span:nth-child(6) { transform: rotateX(-90deg) translateZ(50px); }
+    @keyframes spinCube { from { transform: rotateX(-18deg) rotateY(0deg); } to { transform: rotateX(-18deg) rotateY(360deg); } }
+
+    .section { margin-top: 18px; }
+    .section-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .section-title { font-size: 17px; font-weight: 800; }
+    .section-link { color: var(--blue); font-size: 12px; font-weight: 700; }
+
+    .stats-grid, .actions-grid, .proof-grid, .cost-grid { display: grid; gap: 12px; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .actions-grid { grid-template-columns: repeat(2, 1fr); }
+    .proof-grid { grid-template-columns: repeat(2, 1fr); }
+    .cost-grid { grid-template-columns: 1fr 1fr; }
+
+    .stat-card, .action-card, .media-card, .report-card, .cost-card, .decision-card, .timeline-card, .panel {
+      border-radius: 24px; padding: 14px;
+    }
+    .stat-top, .action-top { display: flex; align-items: center; justify-content: space-between; }
+    .metric { font-size: 24px; font-weight: 900; margin-top: 14px; }
+    .label { color: var(--muted); font-size: 12px; margin-top: 4px; }
+    .mini-icon {
+      width: 42px; height: 42px; border-radius: 15px; display: grid; place-items: center; background: linear-gradient(180deg, rgba(255,255,255,.84), rgba(255,255,255,.4)); box-shadow: inset 0 1px 0 rgba(255,255,255,.94), 0 10px 20px rgba(61,88,155,.12);
+      font-size: 18px;
+    }
+
+    .action-card { min-height: 138px; position: relative; overflow: hidden; }
+    .action-card strong { display: block; font-size: 15px; margin-top: 16px; }
+    .action-card span { display: block; color: var(--muted); margin-top: 6px; font-size: 12px; line-height: 1.4; }
+    .action-card::after {
+      content: ""; position: absolute; right: -30px; bottom: -30px; width: 96px; height: 96px; background: radial-gradient(circle, rgba(118,214,255,.3), transparent 64%);
+    }
+
+    .timeline-card { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 10px; }
+    .timeline-dot { width: 14px; height: 14px; border-radius: 50%; background: linear-gradient(135deg, var(--blue), var(--cyan)); box-shadow: 0 0 0 6px rgba(79,124,255,.12); margin-top: 4px; }
+    .timeline-card small { color: var(--muted); display: block; margin-top: 6px; }
+
+    .segment {
+      display: flex; gap: 8px; padding: 6px; border-radius: 18px; background: rgba(255,255,255,.48); border: 1px solid rgba(255,255,255,.6); margin-top: 14px;
+    }
+    .seg-btn {
+      flex: 1; padding: 12px 10px; border-radius: 14px; background: transparent; color: var(--muted); font-weight: 700;
+    }
+    .seg-btn.active { background: linear-gradient(135deg, rgba(79,124,255,.18), rgba(141,125,255,.14)); color: var(--text); box-shadow: inset 0 1px 0 rgba(255,255,255,.84); }
+
+    .media-thumb {
+      margin-top: 12px; height: 128px; border-radius: 22px; overflow: hidden; position: relative; background: linear-gradient(135deg, rgba(122,171,255,.25), rgba(118,214,255,.25));
+    }
+    .media-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .play-overlay {
+      position: absolute; inset: 0; display: grid; place-items: center; background: linear-gradient(180deg, rgba(16,33,63,.04), rgba(16,33,63,.18));
+    }
+    .play-overlay div {
+      width: 62px; height: 62px; border-radius: 50%; background: rgba(255,255,255,.7); backdrop-filter: blur(14px); display: grid; place-items: center; box-shadow: 0 12px 28px rgba(25,39,71,.18);
+    }
+
+    .chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+    .chip, .small-btn {
+      padding: 10px 12px; border-radius: 14px; background: rgba(255,255,255,.58); font-weight: 700; color: var(--text);
+    }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+    .input, .textarea, .select {
+      width: 100%; border: 1px solid rgba(255,255,255,.6); background: rgba(255,255,255,.46); border-radius: 18px; padding: 14px 14px; color: var(--text); outline: none; font-size: 14px; box-shadow: inset 0 1px 0 rgba(255,255,255,.72);
+    }
+    .textarea { min-height: 120px; resize: none; }
+
+    .signature {
+      margin-top: 12px; height: 96px; border-radius: 22px; border: 1px dashed rgba(79,124,255,.4); background: linear-gradient(180deg, rgba(255,255,255,.58), rgba(255,255,255,.34)); position: relative; overflow: hidden;
+    }
+    .signature svg { width: 100%; height: 100%; }
+
+    .decision-row, .footer-actions { display: flex; gap: 10px; margin-top: 14px; }
+    .decision-row > * , .footer-actions > * { flex: 1; }
+
+    .bottom-nav {
+      position: absolute; left: 16px; right: 16px; bottom: 14px; height: 82px; border-radius: 28px; padding: 10px; display: flex; align-items: center; justify-content: space-between; z-index: 5;
+    }
+    .nav-btn {
+      flex: 1; height: 100%; border-radius: 22px; background: transparent; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; color: var(--muted); font-size: 11px; font-weight: 700;
+    }
+    .nav-btn.active {
+      background: linear-gradient(135deg, rgba(79,124,255,.18), rgba(141,125,255,.18)); color: var(--text); box-shadow: inset 0 1px 0 rgba(255,255,255,.92);
+    }
+    .nav-icon { font-size: 18px; }
+
+    .role-switcher {
+      position: absolute; top: 56px; right: 16px; z-index: 7; display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; max-width: 66%;
+    }
+    .role-pill {
+      border: 0; border-radius: 999px; padding: 10px 12px; font-size: 11px; font-weight: 800; color: var(--text); background: rgba(255,255,255,.56); box-shadow: 0 10px 24px rgba(47,78,133,.12); cursor: pointer;
+    }
+    .role-pill.active { background: linear-gradient(135deg, var(--blue), var(--violet)); color: white; }
+
+    .avatar-stack { display: flex; align-items: center; }
+    .avatar {
+      width: 42px; height: 42px; border-radius: 16px; border: 2px solid rgba(255,255,255,.86); margin-left: -10px; background-size: cover; background-position: center; box-shadow: 0 8px 22px rgba(52,72,122,.16);
+    }
+    .avatar:first-child { margin-left: 0; }
+
+    .fade-up { animation: fadeUp .7s cubic-bezier(.2,.8,.2,1) both; }
+    .delay-1 { animation-delay: .08s; }
+    .delay-2 { animation-delay: .16s; }
+    .delay-3 { animation-delay: .24s; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(18px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+    @media (max-width: 430px) {
+      .phone { height: 100vh; max-height: 100vh; border-radius: 0; padding: 0; }
+      .screen { border-radius: 0; }
+      .app-shell { padding: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <div class="phone">
+      <div class="screen">
+        <div class="role-switcher">
+          <button class="role-pill active" data-role="driver">Conducteur</button>
+          <button class="role-pill" data-role="expert">Expert</button>
+          <button class="role-pill" data-role="insurer">Assureur</button>
+        </div>
+
+        <section class="view active" id="driver-view">
+          <div class="topbar fade-up">
+            <div>
+              <div class="title">AcciChain</div>
+              <div class="subtitle">Application mobile premium de gestion d'accidents avec workflow blockchain.</div>
+            </div>
+            <button class="icon-btn" id="connectWalletBtn" aria-label="Connexion MetaMask">◈</button>
+          </div>
+
+          <div class="hero-card fade-up delay-1">
+            <div class="hero-grid">
+              <div>
+                <div class="hero-title">Déclaration rapide, preuves sécurisées, suivi en temps réel</div>
+                <div class="hero-text">Authentification MetaMask, constat numérique guidé, signature électronique et progression du dossier sans afficher la chaîne de hash brute.</div>
+                <div class="hero-actions">
+                  <button class="primary-btn" data-open="declare">Déclarer un accident</button>
+                  <button class="ghost-btn" data-open="track">Suivre le dossier</button>
+                </div>
+              </div>
+              <div class="wallet-card">
+                <div style="font-size:12px;color:var(--muted);font-weight:700;">Connexion sécurisée</div>
+                <div class="wallet-cube" aria-hidden="true">
+                  <span></span><span></span><span></span><span></span><span></span><span></span>
+                </div>
+                <div style="text-align:center;font-size:12px;color:var(--muted);margin-top:12px;">MetaMask Wallet</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section fade-up delay-2">
+            <div class="section-head"><div class="section-title">Vue dossier</div><div class="section-link">ID ACD-2048</div></div>
+            <div class="stats-grid">
+              <div class="stat-card"><div class="stat-top"><div class="mini-icon">◔</div><div class="chip">Déclaré</div></div><div class="metric">02 min</div><div class="label">Depuis l'ouverture du dossier</div></div>
+              <div class="stat-card"><div class="stat-top"><div class="mini-icon">◎</div><div class="chip">Ancré</div></div><div class="metric">3 preuves</div><div class="label">Photos et vidéo chiffrées</div></div>
+            </div>
+          </div>
+
+          <div class="section fade-up delay-3">
+            <div class="section-head"><div class="section-title">Actions conducteur</div><div class="section-link">Modules actifs</div></div>
+            <div class="actions-grid">
+              <button class="action-card" data-open="declare"><div class="action-top"><div class="mini-icon">✦</div><div class="section-link">SOS</div></div><strong>Déclarer un accident</strong><span>Capture des métadonnées, dossier unique et workflow immédiat.</span></button>
+              <button class="action-card" data-open="media"><div class="action-top"><div class="mini-icon">◫</div><div class="section-link">Caméra</div></div><strong>Prendre photos / vidéo</strong><span>Ajout des preuves avec aperçu immersif et upload fluide.</span></button>
+              <button class="action-card" data-open="report"><div class="action-top"><div class="mini-icon">▣</div><div class="section-link">Conduite</div></div><strong>Remplir le constat</strong><span>Formulaire pas à pas avec validations et cohérence de saisie.</span></button>
+              <button class="action-card" data-open="signature"><div class="action-top"><div class="mini-icon">⌁</div><div class="section-link">Sign</div></div><strong>Signer électroniquement</strong><span>Signature biométrique simulée avec rendu propre et naturel.</span></button>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-head"><div class="section-title">Historique du dossier</div><div class="section-link">Temps réel</div></div>
+            <div class="timeline-card"><div class="timeline-dot"></div><div><strong>Dossier créé</strong><small>Initialisation validée, référence blockchain masquée et sécurisée.</small></div></div>
+            <div class="timeline-card"><div class="timeline-dot"></div><div><strong>Preuves envoyées</strong><small>2 photos et 1 vidéo stockées hors chaîne avec intégrité vérifiable.</small></div></div>
+            <div class="timeline-card"><div class="timeline-dot"></div><div><strong>En attente d'assignation</strong><small>Le dossier est prêt pour l'expertise.</small></div></div>
+          </div>
+        </section>
+
+        <section class="view" id="expert-view">
+          <div class="topbar">
+            <div>
+              <div class="title">Espace Expert</div>
+              <div class="subtitle">Analyse, expertise, estimation et rapport professionnel.</div>
+            </div>
+            <button class="icon-btn" aria-label="Notifications">◌</button>
+          </div>
+
+          <div class="hero-card">
+            <div class="hero-grid">
+              <div>
+                <div class="hero-title">Dossiers assignés, preuves haute fidélité et rapport structuré</div>
+                <div class="hero-text">Interface mobile premium pour analyser rapidement les sinistres, centraliser les preuves et produire une estimation exploitable.</div>
+                <div class="avatar-stack" style="margin-top:16px;">
+                  <div class="avatar" style="background-image:url('https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80');"></div>
+                  <div class="avatar" style="background-image:url('https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=300&q=80');"></div>
+                  <div class="avatar" style="background-image:url('https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=300&q=80');"></div>
+                </div>
+              </div>
+              <div class="wallet-card">
+                <div style="font-size:12px;color:var(--muted);font-weight:700;">File d'expertise</div>
+                <div style="font-size:42px;font-weight:900;margin-top:18px;">08</div>
+                <div class="label">Dossiers assignés aujourd'hui</div>
+                <div class="chips"><button class="chip">Urgent</button><button class="chip">Révision</button></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-head"><div class="section-title">Consultation des dossiers</div><div class="section-link">Tri intelligent</div></div>
+            <div class="segment">
+              <button class="seg-btn active">Assignés</button>
+              <button class="seg-btn">En expertise</button>
+              <button class="seg-btn">Terminés</button>
+            </div>
+            <div class="panel" style="margin-top:12px;">
+              <strong>Dossier ACD-2048</strong>
+              <div class="label" style="margin-top:6px;">Collision urbaine · Marrakech · Conducteur authentifié</div>
+              <div class="chips"><button class="chip">Priorité élevée</button><button class="chip">Bloc avant</button></div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-head"><div class="section-title">Analyser les preuves</div><div class="section-link">Visionneuse</div></div>
+            <div class="proof-grid">
+              <div class="media-card">
+                <strong>Photo impact avant</strong>
+                <div class="media-thumb"><img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80" alt="vehicule"><div class="play-overlay"><div>◉</div></div></div>
+              </div>
+              <div class="media-card">
+                <strong>Vidéo constat</strong>
+                <div class="media-thumb"><img src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=800&q=80" alt="preuve"><div class="play-overlay"><div>▶</div></div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-head"><div class="section-title">Rédiger un rapport d'expertise</div><div class="section-link">Brouillon auto</div></div>
+            <div class="report-card">
+              <div class="form-row">
+                <input class="input" value="Carrosserie avant" />
+                <input class="input" value="Gravité moyenne" />
+              </div>
+              <textarea class="textarea">Déformation du pare-chocs avant, rayures latérales, possible atteinte du support optique droit. Vérification mécanique complémentaire recommandée.</textarea>
+              <div class="footer-actions">
+                <button class="ghost-btn">Enregistrer</button>
+                <button class="primary-btn">Soumettre le rapport</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-head"><div class="section-title">Estimer les coûts</div><div class="section-link">Calculateur</div></div>
+            <div class="cost-grid">
+              <div class="cost-card"><strong>Main d'œuvre</strong><div class="metric" style="font-size:22px;">2 300 DH</div><div class="label">Réparation et ajustement</div></div>
+              <div class="cost-card"><strong>Pièces</strong><div class="metric" style="font-size:22px;">4 800 DH</div><div class="label">Pare-chocs, optique, peinture</div></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" id="insurer-view">
+          <div class="topbar">
+            <div>
+              <div class="title">Espace Assureur</div>
+              <div class="subtitle">Validation, indemnisation et déclenchement de paiement.</div>
+            </div>
+            <button class="icon-btn">◍</button>
+          </div>
+
+          <div class="hero-card">
+            <div class="hero-grid">
+              <div>
+                <div class="hero-title">Décision rapide avec traçabilité complète du dossier</div>
+                <div class="hero-text">Accès aux dossiers, historique du workflow blockchain, décision d'indemnisation et exécution du paiement depuis une interface mobile premium.</div>
+                <div class="hero-actions">
+                  <button class="primary-btn" data-open="decision">Ouvrir la validation</button>
+                  <button class="ghost-btn" data-open="payment">Paiement</button>
+                </div>
+              </div>
+              <div class="wallet-card">
+                <div style="font-size:12px;color:var(--muted);font-weight:700;">Dossiers du jour</div>
+                <div style="font-size:42px;font-weight:900;margin-top:18px;">24</div>
+                <div class="label">8 en attente de validation</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-head"><div class="section-title">Consulter les dossiers</div><div class="section-link">Vue consolidée</div></div>
+            <div class="panel">
+              <strong>Dossier ACD-2048</strong>
+              <div class="label" style="margin-top:6px;">Statut: Estimation reçue · Montant proposé: 7 100 DH</div>
+              <div class="chips"><button class="chip">Historique disponible</button><button class="chip">Expert validé</button></div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-head"><div class="section-title">Historique blockchain</div><div class="section-link">Événements vérifiés</div></div>
+            <div class="timeline-card"><div class="timeline-dot"></div><div><strong>Déclaré</strong><small>Dossier initialisé par le conducteur.</small></div></div>
+            <div class="timeline-card"><div class="timeline-dot"></div><div><strong>Assigné</strong><small>Expert missionné et notification transmise.</small></div></div>
+            <div class="timeline-card"><div class="timeline-dot"></div><div><strong>Expertise</strong><small>Rapport structuré soumis et chiffré.</small></div></div>
+            <div class="timeline-card"><div class="timeline-dot"></div><div><strong>Estimation</strong><small>Coût global validé pour décision assureur.</small></div></div>
+          </div>
+
+          <div class="section" id="decision-section">
+            <div class="section-head"><div class="section-title">Valider ou refuser l'indemnisation</div><div class="section-link">Décision</div></div>
+            <div class="decision-card">
+              <textarea class="textarea">Décision favorable sous réserve de conformité des pièces, validation du montant expert et exécution du paiement sécurisé.</textarea>
+              <div class="decision-row">
+                <button class="ghost-btn" id="rejectBtn">Refuser</button>
+                <button class="primary-btn" id="approveBtn">Valider</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="section" id="payment-section">
+            <div class="section-head"><div class="section-title">Déclencher le paiement</div><div class="section-link">Exécution</div></div>
+            <div class="panel">
+              <div class="form-row">
+                <input class="input" value="7 100 DH" />
+                <input class="input" value="Virement sécurisé" />
+              </div>
+              <div class="footer-actions">
+                <button class="ghost-btn">Planifier</button>
+                <button class="primary-btn" id="payBtn">Déclencher le paiement</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <nav class="bottom-nav">
+          <button class="nav-btn active" data-role="driver"><div class="nav-icon">◈</div><div>Conducteur</div></button>
+          <button class="nav-btn" data-role="expert"><div class="nav-icon">◍</div><div>Expert</div></button>
+          <button class="nav-btn" data-role="insurer"><div class="nav-icon">◎</div><div>Assureur</div></button>
+        </nav>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const roles = {
+      driver: document.getElementById('driver-view'),
+      expert: document.getElementById('expert-view'),
+      insurer: document.getElementById('insurer-view')
+    };
+
+    const roleButtons = [...document.querySelectorAll('[data-role]')];
+    function activateRole(role) {
+      Object.entries(roles).forEach(([key, view]) => view.classList.toggle('active', key === role));
+      roleButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.role === role));
+    }
+    roleButtons.forEach(btn => btn.addEventListener('click', () => activateRole(btn.dataset.role)));
+
+    const walletBtn = document.getElementById('connectWalletBtn');
+    if (walletBtn) {
+      walletBtn.addEventListener('click', () => {
+        walletBtn.textContent = '●';
+        walletBtn.style.background = 'linear-gradient(135deg, rgba(31,191,143,.22), rgba(118,214,255,.25))';
+        document.querySelector('#driver-view .subtitle').textContent = 'Portefeuille MetaMask connecté. Session sécurisée active pour le conducteur.';
+      });
+    }
+
+    document.querySelectorAll('[data-open]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const action = btn.dataset.open;
+        if (action === 'declare' || action === 'report' || action === 'signature' || action === 'media' || action === 'track') activateRole('driver');
+        if (action === 'decision' || action === 'payment') activateRole('insurer');
+
+        if (action === 'signature') {
+          const sig = document.createElement('div');
+          sig.className = 'panel';
+          sig.innerHTML = `<strong>Signature électronique</strong><div class="signature"><svg viewBox="0 0 400 100" preserveAspectRatio="none"><path d="M20 60 C 80 10, 120 90, 170 50 S 250 20, 310 58 S 360 80, 380 30" fill="none" stroke="url(#g)" stroke-width="4" stroke-linecap="round"/><defs><linearGradient id="g"><stop offset="0%" stop-color="#4f7cff"/><stop offset="100%" stop-color="#8d7dff"/></linearGradient></defs></svg></div><div class="footer-actions"><button class="ghost-btn">Effacer</button><button class="primary-btn">Confirmer la signature</button></div>`;
+          const driverView = document.getElementById('driver-view');
+          if (!driverView.querySelector('.signature')) driverView.appendChild(sig);
+          sig.scrollIntoView({behavior:'smooth', block:'center'});
+        }
+        if (action === 'report') window.scrollTo?.(0,0);
+        if (action === 'track') document.querySelector('#driver-view .section:last-child')?.scrollIntoView({behavior:'smooth', block:'start'});
+      });
+    });
+
+    document.getElementById('approveBtn')?.addEventListener('click', e => {
+      e.target.textContent = 'Indemnisation validée';
+      e.target.style.background = 'linear-gradient(135deg, #1fbf8f, #76d6ff)';
+    });
+    document.getElementById('rejectBtn')?.addEventListener('click', e => {
+      e.target.textContent = 'Refus enregistré';
+      e.target.style.background = 'linear-gradient(135deg, rgba(255,107,124,.18), rgba(255,179,71,.22))';
+    });
+    document.getElementById('payBtn')?.addEventListener('click', e => {
+      e.target.textContent = 'Paiement déclenché';
+      e.target.style.background = 'linear-gradient(135deg, #1fbf8f, #4f7cff)';
+    });
+  </script>
+</body>
+</html>

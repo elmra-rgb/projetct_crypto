@@ -30,27 +30,26 @@ export function DossierCard({ dossier, onPress, roleColor }: DossierCardProps) {
       onPress={() => onPress(dossier)}
     >
       <Animated.View style={[styles.card, animStyle]}>
-        <View style={[styles.accent, { backgroundColor: roleColor || Colors.light.accent }]} />
+        <View style={[styles.accent, { backgroundColor: roleColor || Colors.light.blue }]} />
         <View style={styles.body}>
           <View style={styles.header}>
             <Text style={styles.numero}>{dossier.numero}</Text>
             <StatusBadge statut={dossier.statut} />
           </View>
           <Text style={styles.conducteur}>{dossier.conducteurName}</Text>
-          <Text style={styles.vehicule}>{dossier.vehicule} · {dossier.immatriculation}</Text>
+          <Text style={styles.vehicule}>{dossier.vehicule}{dossier.immatriculation ? ` · ${dossier.immatriculation}` : ""}</Text>
           <View style={styles.footer}>
             <View style={styles.footerItem}>
-              <Feather name="map-pin" size={12} color={Colors.light.textMuted} />
+              <Feather name="map-pin" size={11} color={Colors.light.textMuted} />
               <Text style={styles.footerText} numberOfLines={1}>{dossier.lieu}</Text>
             </View>
             <View style={styles.footerItem}>
-              <Feather name="calendar" size={12} color={Colors.light.textMuted} />
+              <Feather name="calendar" size={11} color={Colors.light.textMuted} />
               <Text style={styles.footerText}>{dossier.date}</Text>
             </View>
           </View>
           {dossier.montantEstime !== undefined && (
             <View style={styles.montant}>
-              <Feather name="dollar-sign" size={13} color={Colors.light.gold} />
               <Text style={styles.montantText}>
                 {dossier.montantEstime.toLocaleString("fr-MA")} MAD
               </Text>
@@ -58,7 +57,7 @@ export function DossierCard({ dossier, onPress, roleColor }: DossierCardProps) {
           )}
         </View>
         <View style={styles.chevron}>
-          <Feather name="chevron-right" size={18} color={Colors.light.textMuted} />
+          <Feather name="chevron-right" size={16} color={Colors.light.textMuted} />
         </View>
       </Animated.View>
     </Pressable>
@@ -68,23 +67,23 @@ export function DossierCard({ dossier, onPress, roleColor }: DossierCardProps) {
 const styles = StyleSheet.create({
   card: {
     flexDirection: "row",
-    backgroundColor: Colors.light.surfaceStrong,
-    borderRadius: 16,
+    backgroundColor: Colors.light.cardStrong,
+    borderRadius: 24,
     marginHorizontal: 20,
     marginVertical: 6,
     overflow: "hidden",
     borderWidth: 1,
-    borderColor: Colors.light.border,
-    shadowColor: Colors.light.shadow,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 4,
+    borderColor: Colors.light.stroke,
+    shadowColor: "rgba(73,109,171,0.14)",
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 1,
+    shadowRadius: 20,
+    elevation: 5,
   },
   accent: {
     width: 4,
-    borderTopLeftRadius: 16,
-    borderBottomLeftRadius: 16,
+    borderTopLeftRadius: 24,
+    borderBottomLeftRadius: 24,
   },
   body: {
     flex: 1,
@@ -98,9 +97,9 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   numero: {
-    fontSize: 13,
+    fontSize: 12,
     fontFamily: "Inter_700Bold",
-    color: Colors.light.text,
+    color: Colors.light.blue,
     letterSpacing: 0.5,
   },
   conducteur: {
@@ -111,7 +110,7 @@ const styles = StyleSheet.create({
   vehicule: {
     fontSize: 12,
     fontFamily: "Inter_400Regular",
-    color: Colors.light.textSecondary,
+    color: Colors.light.textMuted,
   },
   footer: {
     flexDirection: "row",
@@ -131,14 +130,16 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   montant: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 3,
-    marginTop: 4,
+    marginTop: 6,
+    alignSelf: "flex-start",
+    backgroundColor: "rgba(255,179,71,0.12)",
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 10,
   },
   montantText: {
-    fontSize: 13,
-    fontFamily: "Inter_600SemiBold",
+    fontSize: 12,
+    fontFamily: "Inter_700Bold",
     color: Colors.light.gold,
   },
   chevron: {

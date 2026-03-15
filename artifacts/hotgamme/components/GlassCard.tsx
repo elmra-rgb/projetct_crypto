@@ -8,17 +8,18 @@ interface GlassCardProps {
   style?: ViewStyle | ViewStyle[];
   intensity?: number;
   padding?: number;
+  strong?: boolean;
 }
 
-export function GlassCard({ children, style, intensity = 60, padding = 20 }: GlassCardProps) {
-  const isIOS = Platform.OS === "ios";
+export function GlassCard({ children, style, intensity = 30, padding = 16, strong = false }: GlassCardProps) {
+  const bg = strong ? Colors.light.cardStrong : Colors.light.card;
 
-  if (isIOS) {
+  if (Platform.OS === "ios") {
     return (
       <BlurView
         intensity={intensity}
         tint="light"
-        style={[styles.card, { padding }, style]}
+        style={[styles.card, { padding }, style as any]}
       >
         {children}
       </BlurView>
@@ -26,7 +27,7 @@ export function GlassCard({ children, style, intensity = 60, padding = 20 }: Gla
   }
 
   return (
-    <View style={[styles.cardAndroid, { padding }, style]}>
+    <View style={[styles.card, { padding, backgroundColor: bg }, style]}>
       {children}
     </View>
   );
@@ -34,20 +35,15 @@ export function GlassCard({ children, style, intensity = 60, padding = 20 }: Gla
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 20,
+    borderRadius: 24,
     overflow: "hidden",
     borderWidth: 1,
-    borderColor: Colors.light.border,
-    shadowColor: Colors.light.shadow,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.15,
-    shadowRadius: 20,
-  },
-  cardAndroid: {
-    borderRadius: 20,
-    backgroundColor: Colors.light.surfaceStrong,
-    borderWidth: 1,
-    borderColor: Colors.light.border,
-    elevation: 6,
+    borderColor: Colors.light.stroke,
+    shadowColor: "rgba(73,109,171,0.18)",
+    shadowOffset: { width: 0, height: 24 },
+    shadowOpacity: 1,
+    shadowRadius: 30,
+    elevation: 8,
+    backgroundColor: Colors.light.card,
   },
 });

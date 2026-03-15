@@ -1,3 +1,4 @@
+import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import React from "react";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
@@ -15,7 +16,7 @@ interface PrimaryButtonProps {
   disabled?: boolean;
   color?: string;
   icon?: React.ReactNode;
-  variant?: "solid" | "outline" | "ghost";
+  variant?: "solid" | "gradient" | "ghost";
 }
 
 export function PrimaryButton({
@@ -23,9 +24,9 @@ export function PrimaryButton({
   onPress,
   loading = false,
   disabled = false,
-  color = Colors.light.accent,
+  color,
   icon,
-  variant = "solid",
+  variant = "gradient",
 }: PrimaryButtonProps) {
   const scale = useSharedValue(1);
 
@@ -40,8 +41,49 @@ export function PrimaryButton({
     }
   };
 
-  const isSolid = variant === "solid";
-  const isOutline = variant === "outline";
+  if (variant === "ghost") {
+    return (
+      <Pressable
+        onPressIn={() => { scale.value = withSpring(0.96, { damping: 15 }); }}
+        onPressOut={() => { scale.value = withSpring(1, { damping: 15 }); }}
+        onPress={handlePress}
+        disabled={disabled || loading}
+      >
+        <Animated.View style={[styles.ghost, (disabled || loading) && styles.disabled, animStyle]}>
+          {loading ? (
+            <ActivityIndicator color={Colors.light.text} size="small" />
+          ) : (
+            <View style={styles.inner}>
+              {icon}
+              <Text style={[styles.label, { color: Colors.light.text }]}>{label}</Text>
+            </View>
+          )}
+        </Animated.View>
+      </Pressable>
+    );
+  }
+
+  if (variant === "solid" && color) {
+    return (
+      <Pressable
+        onPressIn={() => { scale.value = withSpring(0.96, { damping: 15 }); }}
+        onPressOut={() => { scale.value = withSpring(1, { damping: 15 }); }}
+        onPress={handlePress}
+        disabled={disabled || loading}
+      >
+        <Animated.View style={[styles.solid, { backgroundColor: color }, (disabled || loading) && styles.disabled, animStyle]}>
+          {loading ? (
+            <ActivityIndicator color="#fff" size="small" />
+          ) : (
+            <View style={styles.inner}>
+              {icon}
+              <Text style={[styles.label, { color: "#fff" }]}>{label}</Text>
+            </View>
+          )}
+        </Animated.View>
+      </Pressable>
+    );
+  }
 
   return (
     <Pressable
@@ -50,48 +92,63 @@ export function PrimaryButton({
       onPress={handlePress}
       disabled={disabled || loading}
     >
-      <Animated.View
-        style={[
-          styles.button,
-          isSolid && { backgroundColor: color },
-          isOutline && { backgroundColor: "transparent", borderWidth: 1.5, borderColor: color },
-          (disabled || loading) && styles.disabled,
-          animStyle,
-        ]}
-      >
-        {loading ? (
-          <ActivityIndicator color={isSolid ? "#fff" : color} size="small" />
-        ) : (
-          <View style={styles.inner}>
-            {icon}
-            <Text
-              style={[
-                styles.label,
-                isSolid && { color: "#fff" },
-                isOutline && { color },
-                variant === "ghost" && { color },
-              ]}
-            >
-              {label}
-            </Text>
-          </View>
-        )}
+      <Animated.View style={[(disabled || loading) && styles.disabled, animStyle]}>
+        <LinearGradient
+          colors={[Colors.light.blue, Colors.light.violet]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.gradient}
+        >
+          {loading ? (
+            <ActivityIndicator color="#fff" size="small" />
+          ) : (
+            <View style={styles.inner}>
+              {icon}
+              <Text style={[styles.label, { color: "#fff" }]}>{label}</Text>
+            </View>
+          )}
+        </LinearGradient>
       </Animated.View>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  button: {
+  gradient: {
     height: 52,
-    borderRadius: 14,
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "rgba(93,111,255,0.35)",
+    shadowOffset: { width: 0, height: 18 },
+    shadowOpacity: 1,
+    shadowRadius: 18,
+    elevation: 8,
+  },
+  solid: {
+    height: 52,
+    borderRadius: 18,
     alignItems: "center",
     justifyContent: "center",
     shadowColor: "#000",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.2,
+    shadowRadius: 14,
+    elevation: 6,
+  },
+  ghost: {
+    height: 52,
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255,255,255,0.52)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.92)",
+    shadowColor: "rgba(79,124,255,0.08)",
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
+    shadowOpacity: 1,
     shadowRadius: 10,
-    elevation: 4,
+    elevation: 2,
   },
   inner: {
     flexDirection: "row",
@@ -99,9 +156,9 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   label: {
-    fontSize: 16,
-    fontFamily: "Inter_600SemiBold",
-    letterSpacing: 0.3,
+    fontSize: 15,
+    fontFamily: "Inter_700Bold",
+    letterSpacing: 0.2,
   },
   disabled: {
     opacity: 0.5,

@@ -1,40 +1,42 @@
-const primary = "#1A3C5E";
-const accent = "#2196F3";
-const accentLight = "#42A5F5";
-const gold = "#F4A726";
-const success = "#10C97B";
-const danger = "#F44336";
-const warning = "#FF9800";
+const blue = "#4f7cff";
+const violet = "#8d7dff";
+const cyan = "#76d6ff";
 
 export default {
   light: {
-    text: "#0D1B2A",
-    textSecondary: "#4A6080",
-    textMuted: "#8FA5BF",
-    background: "#F0F4F8",
-    backgroundSecondary: "#E4EBF3",
-    surface: "rgba(255, 255, 255, 0.75)",
-    surfaceStrong: "rgba(255, 255, 255, 0.92)",
-    border: "rgba(26, 60, 94, 0.12)",
-    borderStrong: "rgba(26, 60, 94, 0.25)",
-    tint: primary,
-    accent,
-    accentLight,
-    gold,
-    success,
-    danger,
-    warning,
-    tabIconDefault: "#8FA5BF",
-    tabIconSelected: primary,
-    shadow: "rgba(26, 60, 94, 0.15)",
-    gradientStart: "#E8F0FA",
-    gradientEnd: "#F5F9FF",
+    text: "#10213f",
+    textSecondary: "#3a4d6b",
+    textMuted: "#63708b",
+    background: "#edf3ff",
+    backgroundSecondary: "rgba(255,255,255,0.58)",
+    surface: "rgba(255,255,255,0.38)",
+    surfaceStrong: "rgba(255,255,255,0.58)",
+    card: "rgba(255,255,255,0.38)",
+    cardStrong: "rgba(255,255,255,0.58)",
+    stroke: "rgba(255,255,255,0.58)",
+    border: "rgba(79,124,255,0.12)",
+    borderStrong: "rgba(79,124,255,0.25)",
+    tint: blue,
+    accent: blue,
+    accentLight: cyan,
+    blue,
+    violet,
+    cyan,
+    gold: "#ffb347",
+    success: "#1fbf8f",
+    danger: "#ff6b7c",
+    warning: "#ffb347",
+    tabIconDefault: "#63708b",
+    tabIconSelected: blue,
+    shadow: "rgba(73,109,171,0.18)",
+    gradientStart: "#edf3ff",
+    gradientEnd: "#dfeaff",
     metamask: "#F6851B",
-    conducteur: "#1A3C5E",
-    expert: "#0D7C66",
-    assureur: "#5B2C8D",
-    conducteurLight: "rgba(26, 60, 94, 0.1)",
-    expertLight: "rgba(13, 124, 102, 0.1)",
-    assureurLight: "rgba(91, 44, 141, 0.1)",
+    conducteur: blue,
+    expert: "#1fbf8f",
+    assureur: violet,
+    conducteurLight: "rgba(79,124,255,0.12)",
+    expertLight: "rgba(31,191,143,0.12)",
+    assureurLight: "rgba(141,125,255,0.12)",
   },
 };
