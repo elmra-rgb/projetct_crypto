@@ -14,7 +14,7 @@
 
 // Change this to your machine's LAN IP when running on a real device
 // e.g. "http://192.168.1.14:3000"
-export const BACKEND_URL = "http://localhost:3000";
+export const BACKEND_URL = "http://localhost:3001";
 
 /** Generic fetch wrapper with timeout and error handling */
 async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {

@@ -1,4 +1,4 @@
-# AcciChain - Application de Gestion de Sinistres Sinistres (Blockchain & AI)
+# AcciChain - Application de Gestion des Accidents Automobiles au Maroc
 
 Ce dépôt contient l'intégralité du projet AcciChain, une solution de gestion de constats d'accidents sécurisée par la blockchain Ethereum.
 

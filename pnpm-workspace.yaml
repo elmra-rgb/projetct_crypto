@@ -7,6 +7,7 @@ packages:
   - artifacts/*
   - lib/*
   - lib/integrations/*
+  - backend
   - scripts
 
 catalog:
