@@ -45,10 +45,3 @@ pnpm exec expo start
 ```
 *Appuyez sur **`w`** pour lancer la version Web, ou scannez le QR code avec l'application **Expo Go** (Android/iOS).*
 
----
-
-## 🎨 Caractéristiques du Projet
-- **Design Premium** : Glassmorphism profond, thèmes mats (`#dce8f4`), Typography modernisée.
-- **Sécurité Blockchain** : Ancrage des preuves (photos/données) avec hachage SHA-256.
-- **Zéro Emojis** : Interface épurée et professionnelle.
-- **Rôles Multiples** : Conducteur, Expert, Assureur.
