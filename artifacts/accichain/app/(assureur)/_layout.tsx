@@ -21,10 +21,6 @@ function NativeTabLayout() {
         <Icon sf={{ default: "folder", selected: "folder.fill" }} />
         <Label>Dossiers</Label>
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="paiement">
-        <Icon sf={{ default: "creditcard", selected: "creditcard.fill" }} />
-        <Label>Paiement</Label>
-      </NativeTabs.Trigger>
       <NativeTabs.Trigger name="profil">
         <Icon sf={{ default: "person.circle", selected: "person.circle.fill" }} />
         <Label>Profil</Label>
@@ -37,7 +33,6 @@ function TabBar({ state, navigation }: any) {
   const tabs = [
     { name: "index", label: "Accueil", icon: "home" },
     { name: "dossiers", label: "Dossiers", icon: "folder" },
-    { name: "paiement", label: "Paiement", icon: "credit-card" },
     { name: "profil", label: "Profil", icon: "user" },
   ];
 
@@ -77,7 +72,6 @@ function ClassicTabLayout() {
     <Tabs tabBar={(props) => <TabBar {...props} />} screenOptions={{ headerShown: false }}>
       <Tabs.Screen name="index" options={{ title: "Accueil" }} />
       <Tabs.Screen name="dossiers" options={{ title: "Dossiers" }} />
-      <Tabs.Screen name="paiement" options={{ title: "Paiement" }} />
       <Tabs.Screen name="profil" options={{ title: "Profil" }} />
     </Tabs>
   );

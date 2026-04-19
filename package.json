@@ -3,13 +3,14 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "preinstall": "sh -c 'rm -f package-lock.json yarn.lock; case \"$npm_config_user_agent\" in pnpm/*) ;; *) echo \"Use pnpm instead\" >&2; exit 1 ;; esac'",
+    "preinstall": "node -e \"const agent = process.env.npm_config_user_agent || ''; if (!agent.startsWith('pnpm')) { process.stderr.write('Use pnpm instead\\n'); process.exit(1); }\"",
     "build": "pnpm run typecheck && pnpm -r --if-present run build",
     "typecheck:libs": "tsc --build",
     "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck"
   },
   "private": true,
   "devDependencies": {
+    "dotenv": "^16.4.5",
     "@nomicfoundation/hardhat-chai-matchers": "^2.1.2",
     "@nomicfoundation/hardhat-ethers": "^3.1.3",
     "@nomicfoundation/hardhat-ignition": "^0.15.16",
@@ -33,8 +34,5 @@
     "typechain": "^8.3.2",
     "typescript": "~5.9.2"
   },
-  "type": "module",
-  "dependencies": {
-    "expo-av": "^16.0.8"
-  }
+  "type": "module"
 }

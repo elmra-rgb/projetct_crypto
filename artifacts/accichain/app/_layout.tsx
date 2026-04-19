@@ -61,13 +61,6 @@ export default function RootLayout() {
                       headerShown: false,
                     }}
                   />
-                  <Stack.Screen
-                    name="rapport"
-                    options={{
-                      presentation: "modal",
-                      headerShown: false,
-                    }}
-                  />
                 </Stack>
               </KeyboardProvider>
             </GestureHandlerRootView>

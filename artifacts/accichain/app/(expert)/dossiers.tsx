@@ -4,6 +4,7 @@ import {
   FlatList,
   Platform,
   Pressable,
+  RefreshControl,
   StyleSheet,
   Text,
   View,
@@ -13,19 +14,34 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { DossierCard } from "@/components/DossierCard";
 import { useApp, type Dossier } from "@/context/AppContext";
 
-const FILTERS = ["Tous", "En expertise", "Complétés"];
+const FILTERS = ["Tous", "Nouveaux", "En expertise", "Complétés"];
 
 export default function ExpertDossiers() {
   const insets = useSafeAreaInsets();
-  const { dossiers, user } = useApp();
+  const { dossiers, user, refreshDossiers } = useApp();
   const [filter, setFilter] = useState("Tous");
+  const [refreshing, setRefreshing] = useState(false);
   const topInset = Platform.OS === "web" ? 67 : insets.top;
 
-  const myDossiers = dossiers.filter((d) => d.expertId === user?.address);
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await refreshDossiers();
+    setRefreshing(false);
+  };
+
+  const myAddr = user?.address?.toLowerCase() ?? "";
+
+  // Dossiers assignés à cet expert + dossiers déclarés sans expert (nouveaux)
+  const myDossiers = dossiers.filter(
+    (d) =>
+      d.expertId?.toLowerCase() === myAddr ||
+      (d.statut === "declare" && !d.expertId)
+  );
 
   const filtered = myDossiers.filter((d) => {
+    if (filter === "Nouveaux")     return d.statut === "declare" && !d.expertId;
     if (filter === "En expertise") return d.statut === "en_expertise";
-    if (filter === "Complétés") return ["rapport_soumis", "valide", "paye"].includes(d.statut);
+    if (filter === "Complétés")    return ["rapport_soumis", "valide"].includes(d.statut);
     return true;
   });
 
@@ -34,7 +50,7 @@ export default function ExpertDossiers() {
       <View style={styles.matteBackground} />
 
       <View style={[styles.header, { paddingTop: topInset + 16 }]}>
-        <Text style={styles.title}>Dossiers Assignés</Text>
+        <Text style={styles.title}>Mes Dossiers</Text>
         <View style={styles.countBadge}>
           <Text style={styles.countText}>{myDossiers.length}</Text>
         </View>
@@ -71,8 +87,15 @@ export default function ExpertDossiers() {
           />
         )}
         contentContainerStyle={{ paddingVertical: 12, paddingBottom: 130 }}
-        scrollEnabled={!!filtered.length}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor="#10c97b"
+            colors={["#10c97b"]}
+          />
+        }
         ListEmptyComponent={
           <View style={styles.empty}>
             <Feather name="folder" size={44} color="#9ab0c8" />

@@ -212,8 +212,11 @@ export default function LoginScreen() {
   const handleConnect = async () => {
     if (!selectedRole) return;
     setConnecting(true);
-    await connectMetaMask(selectedRole);
-    setConnecting(false);
+    try {
+      await connectMetaMask(selectedRole);
+    } finally {
+      setConnecting(false);
+    }
   };
 
   const roleLabel =

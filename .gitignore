@@ -47,3 +47,10 @@ Thumbs.db
 # Replit
 .cache/
 .local/
+
+# Variables d'environnement — NE JAMAIS commiter
+.env
+.env.local
+.env.*.local
+backend/.env
+backend-php/.env

@@ -37,12 +37,6 @@ const CONFIG: Record<Statut, { label: string; color: string; bg: string; icon: s
     bg: "rgba(198, 40, 40, 0.12)",
     icon: "x-circle",
   },
-  paye: {
-    label: "Payé",
-    color: "#00695C",
-    bg: "rgba(0, 105, 92, 0.12)",
-    icon: "dollar-sign",
-  },
 };
 
 export function StatusBadge({ statut }: { statut: Statut }) {

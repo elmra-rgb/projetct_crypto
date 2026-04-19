@@ -1,18 +1,57 @@
 {
   "_format": "hh-sol-cache-2",
   "files": {
-    "/Users/rania/Insurance-Flow/contracts/AccidentContract.sol": {
-      "lastModificationDate": 1774128578952,
-      "contentHash": "8dbde40a476b0b860070a7d38d656aa7",
-      "sourceName": "contracts/AccidentContract.sol",
+    "C:\\Users\\kabba\\projetct_crypto\\contracts\\AccidentDApp.sol": {
+      "lastModificationDate": 1776542642711,
+      "contentHash": "fea60999b3e0addf5b9c81e4b00c35d1",
+      "sourceName": "contracts/AccidentDApp.sol",
       "solcConfig": {
         "version": "0.8.20",
         "settings": {
-          "evmVersion": "paris",
           "optimizer": {
-            "enabled": false,
+            "enabled": true,
             "runs": 200
           },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./RoleRegistry.sol",
+        "./AccidentStorage.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "AccidentDApp"
+      ]
+    },
+    "C:\\Users\\kabba\\projetct_crypto\\contracts\\RoleRegistry.sol": {
+      "lastModificationDate": 1776527329446,
+      "contentHash": "8d306878ba43f4a4474089b1d58c0b0e",
+      "sourceName": "contracts/RoleRegistry.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
@@ -34,7 +73,43 @@
         "^0.8.20"
       ],
       "artifacts": [
-        "AccidentContract"
+        "RoleRegistry"
+      ]
+    },
+    "C:\\Users\\kabba\\projetct_crypto\\contracts\\AccidentStorage.sol": {
+      "lastModificationDate": 1776527361761,
+      "contentHash": "bd102c9a8c81f2cbfd32f057c3721a57",
+      "sourceName": "contracts/AccidentStorage.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "AccidentStorage"
       ]
     }
   }

@@ -26,7 +26,7 @@ export default function AccidentsScreen() {
 
   const filtered = myDossiers.filter((d) => {
     if (filter === "En cours") return ["declare", "en_expertise", "rapport_soumis"].includes(d.statut);
-    if (filter === "Terminés") return ["valide", "refuse", "paye"].includes(d.statut);
+    if (filter === "Terminés") return ["valide", "refuse"].includes(d.statut);
     return true;
   });
 

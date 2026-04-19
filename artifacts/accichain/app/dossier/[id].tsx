@@ -1,6 +1,8 @@
 import { router, useLocalSearchParams } from "expo-router";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
+  Alert,
+  Clipboard,
   Image,
   Platform,
   Pressable,
@@ -17,13 +19,13 @@ import { GlassCard } from "@/components/GlassCard";
 import { StatusBadge } from "@/components/StatusBadge";
 import { PrimaryButton } from "@/components/PrimaryButton";
 import { useApp } from "@/context/AppContext";
+import { resolveImageUri, resolveWithFallback } from "@/utils/ipfs";
 
 const STATUT_STEPS = [
   { key: "declare", label: "Déclaré" },
   { key: "en_expertise", label: "En expertise" },
   { key: "rapport_soumis", label: "Rapport soumis" },
   { key: "valide", label: "Validé" },
-  { key: "paye", label: "Indemnisé" },
 ];
 
 function Timeline({ statut }: { statut: string }) {
@@ -83,6 +85,16 @@ export default function DossierDetail() {
 
   const dossier = dossiers.find((d) => d.id === id);
 
+  // URLs résolues avec fallback multi-gateway pour les CIDs IPFS
+  const [evidenceUrl, setEvidenceUrl] = useState<string | undefined>(undefined);
+  const [rapportUrl,  setRapportUrl]  = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    const cid = dossier?.evidenceCID || dossier?.ipfsCid;
+    if (cid) resolveWithFallback(cid).then(setEvidenceUrl);
+    if (dossier?.rapportCID) resolveWithFallback(dossier.rapportCID).then(setRapportUrl);
+  }, [dossier?.evidenceCID, dossier?.ipfsCid, dossier?.rapportCID]);
+
   if (!dossier) {
     return (
       <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: "#dce8f4" }}>
@@ -104,7 +116,22 @@ export default function DossierDetail() {
     { icon: "hash", label: "Immatriculation", value: dossier.immatriculation },
     { icon: "calendar", label: "Date", value: dossier.date },
     { icon: "map-pin", label: "Lieu", value: dossier.lieu },
+    ...(dossier.gpsCoords
+      ? [{ icon: "navigation", label: "GPS", value: `${dossier.gpsCoords.latitude.toFixed(5)}, ${dossier.gpsCoords.longitude.toFixed(5)}` }]
+      : []),
+    ...(dossier.temoins
+      ? [{ icon: "users", label: "Témoins", value: dossier.temoins }]
+      : []),
   ];
+
+  const GRAVITE_LABEL: Record<string, string> = { leger: "Léger", moyen: "Moyen", grave: "Grave" };
+  const GRAVITE_COLOR: Record<string, string> = { leger: "#10c97b", moyen: "#e0a800", grave: "#c0392b" };
+
+  const copyToClipboard = (text: string, label: string) => {
+    Clipboard.setString(text);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    Alert.alert("Copié", `${label} copié dans le presse-papier.`);
+  };
 
   return (
     <View style={styles.root}>
@@ -168,18 +195,24 @@ export default function DossierDetail() {
 
           <GlassCard padding={16} radius={24} style={styles.card}>
             <Text style={styles.cardTitle}>Preuves & Photos</Text>
+            {/* Photos locales du conducteur */}
             {dossier.photos && dossier.photos.length > 0 ? (
               <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 12 }}>
                 {dossier.photos.map((uri, index) => (
                   <View key={index} style={styles.preuveImageWrapper}>
-                    <Image source={{ uri }} style={styles.preuveImage} />
+                    <Image source={{ uri: resolveImageUri(uri) }} style={styles.preuveImage} />
                   </View>
                 ))}
               </ScrollView>
+            ) : evidenceUrl ? (
+              /* Photo chargée depuis IPFS via gateway avec fallback */
+              <View style={styles.preuveImageWrapper}>
+                <Image source={{ uri: evidenceUrl }} style={styles.preuveImage} />
+              </View>
             ) : (
               <View style={styles.emptyPreuves}>
                 <Feather name="camera-off" size={24} color="#7a9ab8" />
-                <Text style={styles.emptyPreuvesText}>Aucune photo attachee</Text>
+                <Text style={styles.emptyPreuvesText}>Aucune photo attachée</Text>
               </View>
             )}
           </GlassCard>
@@ -205,7 +238,7 @@ export default function DossierDetail() {
                     : `0x${dossier.id}...${dossier.numero.replace(/[^0-9]/g, "")}`}
                 </Text>
               </View>
-              <Pressable onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}>
+              <Pressable onPress={() => copyToClipboard(dossier.blockchainTx || dossier.id, "TX")}>
                 <Feather name="copy" size={16} color="#7a9ab8" />
               </Pressable>
             </View>
@@ -218,9 +251,95 @@ export default function DossierDetail() {
                     {dossier.evidenceHash.substring(0, 28)}...
                   </Text>
                 </View>
+                <Pressable onPress={() => copyToClipboard(dossier.evidenceHash!, "Hash")}>
+                  <Feather name="copy" size={16} color="#7a9ab8" />
+                </Pressable>
+              </View>
+            )}
+            {(dossier.evidenceCID || dossier.ipfsCid) && (
+              <View style={[styles.blockchainRow, { marginTop: 12, paddingTop: 12, borderTopWidth: 1, borderTopColor: "rgba(255,255,255,0.4)" }]}>
+                <Feather name="database" size={16} color="#9b59b6" />
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.blockchainTitle, { color: "#9b59b6" }]}>IPFS CID — Preuves</Text>
+                  <Text style={styles.blockchainHash} numberOfLines={1}>
+                    {(dossier.evidenceCID || dossier.ipfsCid)!.substring(0, 28)}...
+                  </Text>
+                  {evidenceUrl && (
+                    <Text style={styles.gatewayUrl} numberOfLines={1}>{evidenceUrl}</Text>
+                  )}
+                </View>
+                <Pressable onPress={() => copyToClipboard(evidenceUrl ?? (dossier.evidenceCID || dossier.ipfsCid)!, "URL IPFS")}>
+                  <Feather name="copy" size={16} color="#7a9ab8" />
+                </Pressable>
+              </View>
+            )}
+            {dossier.rapportCID && (
+              <View style={[styles.blockchainRow, { marginTop: 12, paddingTop: 12, borderTopWidth: 1, borderTopColor: "rgba(255,255,255,0.4)" }]}>
+                <Feather name="file-text" size={16} color="#10c97b" />
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.blockchainTitle, { color: "#10c97b" }]}>IPFS CID — Rapport expert</Text>
+                  <Text style={styles.blockchainHash} numberOfLines={1}>
+                    {dossier.rapportCID.substring(0, 28)}...
+                  </Text>
+                  {rapportUrl && (
+                    <Text style={styles.gatewayUrl} numberOfLines={1}>{rapportUrl}</Text>
+                  )}
+                </View>
+                <Pressable onPress={() => copyToClipboard(rapportUrl ?? dossier.rapportCID!, "URL Rapport")}>
+                  <Feather name="copy" size={16} color="#7a9ab8" />
+                </Pressable>
               </View>
             )}
           </GlassCard>
+
+          {(dossier.rapportExpert || dossier.circonstancesExpert || dossier.dommagesExpert || dossier.photosExpert?.length) && (
+            <GlassCard padding={16} radius={24} style={styles.card}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 16 }}>
+                <Text style={styles.cardTitle}>Rapport d'expertise</Text>
+                {dossier.gravite && (
+                  <View style={{ backgroundColor: GRAVITE_COLOR[dossier.gravite] + "20", paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 }}>
+                    <Text style={{ fontSize: 12, fontFamily: "Inter_600SemiBold", color: GRAVITE_COLOR[dossier.gravite] }}>
+                      {GRAVITE_LABEL[dossier.gravite]}
+                    </Text>
+                  </View>
+                )}
+              </View>
+
+              {dossier.circonstancesExpert && (
+                <View style={{ marginBottom: 14 }}>
+                  <Text style={styles.expertSectionLabel}>Circonstances (version expert)</Text>
+                  <Text style={styles.description}>{dossier.circonstancesExpert}</Text>
+                </View>
+              )}
+
+              {dossier.dommagesExpert && (
+                <View style={{ marginBottom: 14 }}>
+                  <Text style={styles.expertSectionLabel}>Dommages observés</Text>
+                  <Text style={styles.description}>{dossier.dommagesExpert}</Text>
+                </View>
+              )}
+
+              {dossier.photosExpert && dossier.photosExpert.length > 0 && (
+                <View style={{ marginBottom: 14 }}>
+                  <Text style={styles.expertSectionLabel}>{dossier.photosExpert.length} photo(s) de l'expert</Text>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 12, marginTop: 8 }}>
+                    {dossier.photosExpert.map((uri, index) => (
+                      <View key={index} style={styles.preuveImageWrapper}>
+                        <Image source={{ uri: resolveImageUri(uri) }} style={styles.preuveImage} />
+                      </View>
+                    ))}
+                  </ScrollView>
+                </View>
+              )}
+
+              {dossier.rapportExpert && (
+                <View>
+                  <Text style={styles.expertSectionLabel}>Conclusion d'expertise</Text>
+                  <Text style={styles.description}>{dossier.rapportExpert}</Text>
+                </View>
+              )}
+            </GlassCard>
+          )}
 
           {user?.role === "conducteur" && dossier.statut === "declare" && (
             <PrimaryButton
@@ -280,4 +399,6 @@ const styles = StyleSheet.create({
   blockchainRow: { flexDirection: "row", alignItems: "center", gap: 14 },
   blockchainTitle: { fontSize: 13, fontFamily: "Inter_600SemiBold", marginBottom: 2 },
   blockchainHash: { fontSize: 12, fontFamily: "Inter_400Regular", color: "#7a9ab8" },
+  gatewayUrl: { fontSize: 10, fontFamily: "Inter_400Regular", color: "#9b59b6", marginTop: 2 },
+  expertSectionLabel: { fontSize: 12, fontFamily: "Inter_600SemiBold", color: "#10c97b", marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.5 },
 });

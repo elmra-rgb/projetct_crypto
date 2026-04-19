@@ -2,7 +2,6 @@ import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import React from "react";
 import {
-  Dimensions,
   Platform,
   Pressable,
   ScrollView,
@@ -13,188 +12,171 @@ import {
 import { Feather } from "@expo/vector-icons";
 import { FontAwesome5, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { BlurView } from "expo-blur";
+import { GlassCard } from "@/components/GlassCard";
 import { StatusBadge } from "@/components/StatusBadge";
 import { useApp } from "@/context/AppContext";
 
-const { width } = Dimensions.get("window");
+const ACCENT = "#1c6ea9";
 
-// ─── Reusable GlassPane ──────────────────────────────────────────────────────
-function GlassPane({
-  children,
-  style,
-  padding = 20,
-}: {
-  children: React.ReactNode;
-  style?: any;
-  padding?: number;
-}) {
-  return (
-    <View style={[glassStyle.wrap, style]}>
-      <BlurView intensity={60} tint="light" style={StyleSheet.absoluteFill} />
-      <View style={[glassStyle.inner, { padding }]}>{children}</View>
-    </View>
-  );
-}
-
-const glassStyle = StyleSheet.create({
-  wrap: {
-    borderRadius: 28,
-    overflow: "hidden",
-    backgroundColor: "rgba(255,255,255,0.55)",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.65)",
-    shadowColor: "#1d3a5e",
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.1,
-    shadowRadius: 24,
-    elevation: 6,
-  },
-  inner: {
-    backgroundColor: "transparent",
-  },
-});
-
-// ─── Component ───────────────────────────────────────────────────────────────
 export default function ConducteurHome() {
   const insets = useSafeAreaInsets();
-  const { user, dossiers } = useApp();
+  const { user, dossiers, refreshDossiers } = useApp();
   const topInset = Platform.OS === "web" ? 67 : insets.top;
 
-  const myDossiers = dossiers.filter((d) => d.conducteurName === user?.name);
+  const myDossiers = dossiers.filter(
+    (d) => d.conducteurId?.toLowerCase() === user?.address?.toLowerCase()
+  );
+  const enCours   = myDossiers.filter((d) => ["declare", "en_expertise", "rapport_soumis"].includes(d.statut));
   const totalMontant = myDossiers.reduce((sum, d) => sum + (d.montantEstime || 0), 0);
+  const shortAddr = user?.address ? `${user.address.slice(0, 6)}...${user.address.slice(-4)}` : "—";
 
   return (
-    <View style={styles.root}>
-      {/* ── Matte Background ── */}
-      <View style={styles.matteBackground} />
+    <View style={s.root}>
+      <View style={s.bg} />
 
       <ScrollView
-        style={styles.scroll}
+        style={s.scroll}
         contentContainerStyle={{ paddingBottom: 130 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* ── Top bar ── */}
-        <View style={[styles.topbar, { paddingTop: topInset + 16 }]}>
+        {/* ── Header ── */}
+        <View style={[s.header, { paddingTop: topInset + 20 }]}>
           <View style={{ flex: 1 }}>
-            <Text style={styles.appTitle}>AcciChain</Text>
-            <Text style={styles.appSubtitle}>Conducteur · {user?.name || "Mon espace"}</Text>
+            <Text style={s.greeting}>Bonjour 👋</Text>
+            <Text style={s.heroName}>{user?.name || "Conducteur"}</Text>
           </View>
-          <GlassPane padding={10} style={styles.iconBtn}>
-            <MaterialCommunityIcons name="ethereum" size={20} color="#1c6ea9" />
-          </GlassPane>
+          <View style={s.walletBadge}>
+            <MaterialCommunityIcons name="ethereum" size={13} color={ACCENT} />
+            <Text style={s.walletText}>{shortAddr}</Text>
+          </View>
         </View>
-
-        {/* ── HERO greeting ── */}
-        <GlassPane style={styles.heroCard} padding={24}>
-          <View style={styles.heroRow}>
-            <View>
-              <Text style={styles.heroGreeting}>Bonjour</Text>
-              <Text style={styles.heroName}>{user?.name || "Conducteur"}</Text>
-              <Text style={styles.heroMeta}>Espace sécurisé · Blockchain</Text>
-            </View>
-            <View style={styles.heroIconWrap}>
-              <LinearGradient
-                colors={["#1e2b3c", "#0f1a24"]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.heroIconGrad}
-              >
-                <FontAwesome5 name="car" size={22} color="#fff" />
-              </LinearGradient>
-            </View>
-          </View>
-        </GlassPane>
 
         {/* ── Stats ── */}
-        <View style={styles.statsRow}>
-          <GlassPane padding={18} style={styles.statCard}>
-            <View style={styles.statIconWrap}>
-              <Feather name="folder-plus" size={18} color="#1c6ea9" />
+        <View style={s.statsRow}>
+          <GlassCard padding={16} style={s.statCard} radius={22}>
+            <View style={[s.statIcon, { backgroundColor: "rgba(28,110,169,0.1)" }]}>
+              <Feather name="folder" size={16} color={ACCENT} />
             </View>
-            <Text style={styles.statNumber}>{myDossiers.length}</Text>
-            <Text style={styles.statLabel}>Dossiers totaux</Text>
-          </GlassPane>
+            <Text style={s.statNum}>{myDossiers.length}</Text>
+            <Text style={s.statLbl}>Total</Text>
+          </GlassCard>
 
-          <GlassPane padding={18} style={styles.statCard}>
-            <View style={[styles.statIconWrap, { backgroundColor: "rgba(255,193,7,0.15)" }]}>
-              <MaterialCommunityIcons name="cash" size={18} color="#e0a800" />
+          <GlassCard padding={16} style={s.statCard} radius={22}>
+            <View style={[s.statIcon, { backgroundColor: "rgba(224,168,0,0.1)" }]}>
+              <Feather name="clock" size={16} color="#e0a800" />
             </View>
-            <Text style={[styles.statNumber, { fontSize: totalMontant > 0 ? 15 : 24 }]} numberOfLines={1}>
-              {totalMontant > 0 ? `${totalMontant.toLocaleString("fr-MA")} MAD` : "0"}
+            <Text style={[s.statNum, { color: "#e0a800" }]}>{enCours.length}</Text>
+            <Text style={s.statLbl}>En cours</Text>
+          </GlassCard>
+
+          <GlassCard padding={16} style={s.statCard} radius={22}>
+            <View style={[s.statIcon, { backgroundColor: "rgba(16,201,123,0.1)" }]}>
+              <MaterialCommunityIcons name="cash" size={16} color="#10c97b" />
+            </View>
+            <Text style={[s.statNum, { fontSize: totalMontant > 999 ? 13 : 22 }]} numberOfLines={1}>
+              {totalMontant > 0 ? `${(totalMontant / 1000).toFixed(0)}K` : "0"}
             </Text>
-            <Text style={styles.statLabel}>Montant total</Text>
-          </GlassPane>
+            <Text style={s.statLbl}>MAD estimé</Text>
+          </GlassCard>
         </View>
 
-        {/* ── Main Action ── */}
+        {/* ── CTA principale ── */}
         <Pressable
           onPress={() => router.push("/(conducteur)/declarer" as any)}
-          style={({ pressed }) => [styles.mainActionWrap, pressed && { opacity: 0.88 }]}
+          style={({ pressed }) => [s.ctaWrap, pressed && { opacity: 0.88 }]}
         >
           <LinearGradient
-            colors={["#1f2f3c", "#13212e"]}
+            colors={["#1a3a5c", "#0f2235"]}
             start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={styles.mainActionGrad}
+            end={{ x: 1, y: 1 }}
+            style={s.ctaGrad}
           >
-            <View style={styles.mainActionIconWrap}>
-              <MaterialCommunityIcons name="car-emergency" size={22} color="#fff" />
+            <View style={s.ctaIconBox}>
+              <MaterialCommunityIcons name="car-emergency" size={24} color="#fff" />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.mainActionTitle}>Nouvelle Déclaration</Text>
-              <Text style={styles.mainActionSub}>Signaler un nouvel accident</Text>
+              <Text style={s.ctaTitle}>Déclarer un accident</Text>
+              <Text style={s.ctaSub}>Signez et ancrez sur la blockchain</Text>
             </View>
-            <Feather name="chevron-right" size={20} color="rgba(255,255,255,0.55)" />
+            <View style={s.ctaArrow}>
+              <Feather name="arrow-right" size={18} color="#fff" />
+            </View>
           </LinearGradient>
         </Pressable>
 
-        {/* ── Secondary actions ── */}
-        <View style={styles.secRow}>
-          <GlassPane padding={16} style={styles.secCard}>
-            <Pressable style={styles.secInner}>
-              <View style={[styles.secIconWrap, { backgroundColor: "rgba(44,124,182,0.12)" }]}>
-                <Feather name="phone-call" size={16} color="#1c6ea9" />
+        {/* ── Actions rapides ── */}
+        <View style={s.quickRow}>
+          <Pressable
+            style={s.quickCard}
+            onPress={() => router.push("/(conducteur)/accidents" as any)}
+          >
+            <GlassCard padding={16} radius={20} style={s.quickInner}>
+              <View style={[s.quickIcon, { backgroundColor: "rgba(28,110,169,0.1)" }]}>
+                <Feather name="list" size={18} color={ACCENT} />
               </View>
-              <Text style={styles.secLabel}>Assistance 24/7</Text>
-            </Pressable>
-          </GlassPane>
-          <GlassPane padding={16} style={styles.secCard}>
-            <Pressable style={styles.secInner} onPress={() => router.push("/(conducteur)/profil" as any)}>
-              <View style={[styles.secIconWrap, { backgroundColor: "rgba(44,124,182,0.12)" }]}>
-                <Feather name="shield" size={16} color="#1c6ea9" />
+              <Text style={s.quickLabel}>Mes accidents</Text>
+              <Text style={s.quickSub}>{myDossiers.length} dossier{myDossiers.length > 1 ? "s" : ""}</Text>
+            </GlassCard>
+          </Pressable>
+
+          <Pressable
+            style={s.quickCard}
+            onPress={() => router.push("/(conducteur)/profil" as any)}
+          >
+            <GlassCard padding={16} radius={20} style={s.quickInner}>
+              <View style={[s.quickIcon, { backgroundColor: "rgba(142,68,173,0.1)" }]}>
+                <Feather name="shield" size={18} color="#8e44ad" />
               </View>
-              <Text style={styles.secLabel}>Mes contrats</Text>
-            </Pressable>
-          </GlassPane>
+              <Text style={s.quickLabel}>Mon profil</Text>
+              <Text style={s.quickSub}>Wallet · Sécurité</Text>
+            </GlassCard>
+          </Pressable>
         </View>
 
-        {/* ── Historique ── */}
-        <Text style={styles.sectionTitle}>Historique du dossier</Text>
+        {/* ── Dossiers récents ── */}
+        <View style={s.sectionHeader}>
+          <Text style={s.sectionTitle}>Dossiers récents</Text>
+          {myDossiers.length > 3 && (
+            <Pressable onPress={() => router.push("/(conducteur)/accidents" as any)}>
+              <Text style={s.sectionLink}>Voir tout</Text>
+            </Pressable>
+          )}
+        </View>
+
         {myDossiers.length === 0 ? (
-          <GlassPane padding={24} style={styles.emptyCard}>
-            <Feather name="folder" size={30} color="#9ab0c8" />
-            <Text style={styles.emptyText}>Aucun dossier déclaré</Text>
-          </GlassPane>
+          <GlassCard padding={32} style={s.emptyCard} radius={24}>
+            <Feather name="folder" size={36} color="#9ab0c8" />
+            <Text style={s.emptyTitle}>Aucun dossier déclaré</Text>
+            <Text style={s.emptySub}>Vos déclarations apparaîtront ici</Text>
+          </GlassCard>
         ) : (
-          myDossiers.slice(0, 3).map((d) => (
+          myDossiers.slice(0, 4).map((d) => (
             <Pressable
               key={d.id}
               onPress={() => router.push({ pathname: "/dossier/[id]", params: { id: d.id } })}
-              style={({ pressed }) => [{ opacity: pressed ? 0.85 : 1 }, styles.timelineWrap]}
+              style={({ pressed }) => [s.dossierWrap, pressed && { opacity: 0.85 }]}
             >
-              <GlassPane padding={16} style={styles.timelineCard}>
-                <View style={styles.timelineDot} />
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.timelineTitle}>{d.numero}</Text>
-                  <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginTop: 4 }}>
+              <GlassCard padding={0} radius={20} style={s.dossierCard}>
+                <View style={[s.dossierAccent, {
+                  backgroundColor:
+                    d.statut === "valide" ? "#10c97b" :
+                    d.statut === "refuse" ? "#c0392b" :
+                    d.statut === "rapport_soumis" ? "#8e44ad" :
+                    ACCENT,
+                }]} />
+                <View style={s.dossierContent}>
+                  <View style={s.dossierTop}>
+                    <Text style={s.dossierNum}>{d.numero}</Text>
                     <StatusBadge statut={d.statut} />
-                    <Text style={styles.timelineSub}>{d.lieu}</Text>
                   </View>
-                  <Text style={styles.timelineDate}>{d.date}</Text>
+                  <View style={s.dossierBottom}>
+                    <Feather name="map-pin" size={12} color="#7a9ab8" />
+                    <Text style={s.dossierLieu} numberOfLines={1}>{d.lieu}</Text>
+                    <Text style={s.dossierDate}>{d.date}</Text>
+                  </View>
                 </View>
-                <Feather name="chevron-right" size={16} color="#9ab0c8" />
-              </GlassPane>
+                <Feather name="chevron-right" size={16} color="#9ab0c8" style={{ marginRight: 16 }} />
+              </GlassCard>
             </Pressable>
           ))
         )}
@@ -203,148 +185,75 @@ export default function ConducteurHome() {
   );
 }
 
-const styles = StyleSheet.create({
+const s = StyleSheet.create({
   root: { flex: 1 },
-  matteBackground: {
-    ...StyleSheet.absoluteFillObject,
-    // Solid matte blue-grey that makes glass pop — no animation
-    backgroundColor: "#dce8f4",
-  },
+  bg: { ...StyleSheet.absoluteFillObject, backgroundColor: "#dce8f4" },
   scroll: { flex: 1 },
-  topbar: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    paddingBottom: 12,
-    gap: 12,
-  },
-  appTitle: {
-    fontSize: 28,
-    fontFamily: "Inter_700Bold",
-    color: "#0b2b3b",
-    letterSpacing: -0.5,
-  },
-  appSubtitle: {
-    fontSize: 12,
-    fontFamily: "Inter_400Regular",
-    color: "#4a7090",
-    marginTop: 1,
-  },
-  iconBtn: { borderRadius: 16, overflow: "hidden" },
 
-  // Hero card
-  heroCard: { marginHorizontal: 18, marginBottom: 16 },
-  heroRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  heroGreeting: { fontSize: 14, fontFamily: "Inter_400Regular", color: "#4a7090", marginBottom: 2 },
-  heroName: { fontSize: 22, fontFamily: "Inter_700Bold", color: "#0b2b3b", letterSpacing: -0.3 },
-  heroMeta: {
-    fontSize: 11,
-    fontFamily: "Inter_400Regular",
-    color: "#7a9ab8",
-    marginTop: 4,
-    backgroundColor: "rgba(90,140,180,0.12)",
-    paddingVertical: 3,
-    paddingHorizontal: 9,
-    borderRadius: 30,
-    alignSelf: "flex-start",
+  header: {
+    flexDirection: "row", alignItems: "flex-start",
+    paddingHorizontal: 20, paddingBottom: 20, gap: 12,
   },
-  heroIconWrap: {},
-  heroIconGrad: {
-    width: 54,
-    height: 54,
-    borderRadius: 20,
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.15,
-    shadowRadius: 14,
-    elevation: 5,
+  greeting: { fontSize: 14, fontFamily: "Inter_400Regular", color: "#4a7090" },
+  heroName: { fontSize: 26, fontFamily: "Inter_700Bold", color: "#0b2b3b", letterSpacing: -0.5, marginTop: 2 },
+  walletBadge: {
+    flexDirection: "row", alignItems: "center", gap: 5,
+    backgroundColor: "rgba(28,110,169,0.1)", paddingHorizontal: 10, paddingVertical: 6,
+    borderRadius: 20, marginTop: 4,
   },
+  walletText: { fontSize: 11, fontFamily: "Inter_600SemiBold", color: ACCENT },
 
-  // Stats
-  statsRow: { flexDirection: "row", gap: 12, marginHorizontal: 18, marginBottom: 16 },
-  statCard: { flex: 1, alignItems: "center" },
-  statIconWrap: {
-    width: 40,
-    height: 40,
-    borderRadius: 14,
-    backgroundColor: "rgba(44,124,182,0.12)",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 10,
-  },
-  statNumber: { fontSize: 24, fontFamily: "Inter_700Bold", color: "#0b2b3b" },
-  statLabel: { fontSize: 12, fontFamily: "Inter_400Regular", color: "#4a7090", marginTop: 2 },
+  statsRow: { flexDirection: "row", gap: 10, marginHorizontal: 18, marginBottom: 18 },
+  statCard: { flex: 1, alignItems: "center", gap: 6 },
+  statIcon: { width: 38, height: 38, borderRadius: 12, alignItems: "center", justifyContent: "center" },
+  statNum: { fontSize: 22, fontFamily: "Inter_700Bold", color: "#0b2b3b", lineHeight: 26 },
+  statLbl: { fontSize: 11, fontFamily: "Inter_400Regular", color: "#4a7090" },
 
-  // Main action
-  mainActionWrap: {
-    marginHorizontal: 18,
-    marginBottom: 16,
-    borderRadius: 28,
+  ctaWrap: {
+    marginHorizontal: 18, marginBottom: 16, borderRadius: 24,
     overflow: "hidden",
-    shadowColor: "#0b2b3b",
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.25,
-    shadowRadius: 18,
-    elevation: 7,
+    shadowColor: "#0b2b3b", shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.2, shadowRadius: 18, elevation: 8,
   },
-  mainActionGrad: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 20,
-    paddingHorizontal: 22,
-    gap: 14,
-  },
-  mainActionIconWrap: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
+  ctaGrad: { flexDirection: "row", alignItems: "center", padding: 20, gap: 14 },
+  ctaIconBox: {
+    width: 48, height: 48, borderRadius: 16,
     backgroundColor: "rgba(255,255,255,0.12)",
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: "center", justifyContent: "center",
   },
-  mainActionTitle: { fontSize: 16, fontFamily: "Inter_700Bold", color: "#fff", marginBottom: 2 },
-  mainActionSub: { fontSize: 12, fontFamily: "Inter_400Regular", color: "rgba(255,255,255,0.7)" },
+  ctaTitle: { fontSize: 16, fontFamily: "Inter_700Bold", color: "#fff", marginBottom: 3 },
+  ctaSub: { fontSize: 12, fontFamily: "Inter_400Regular", color: "rgba(255,255,255,0.65)" },
+  ctaArrow: {
+    width: 36, height: 36, borderRadius: 18,
+    backgroundColor: "rgba(255,255,255,0.1)",
+    alignItems: "center", justifyContent: "center",
+  },
 
-  // Secondary
-  secRow: { flexDirection: "row", gap: 12, marginHorizontal: 18, marginBottom: 24 },
-  secCard: { flex: 1 },
-  secInner: { alignItems: "center", gap: 8 },
-  secIconWrap: {
-    width: 38,
-    height: 38,
-    borderRadius: 13,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  secLabel: { fontSize: 13, fontFamily: "Inter_600SemiBold", color: "#1f3b4c" },
+  quickRow: { flexDirection: "row", gap: 12, marginHorizontal: 18, marginBottom: 24 },
+  quickCard: { flex: 1 },
+  quickInner: { alignItems: "flex-start", gap: 8 },
+  quickIcon: { width: 40, height: 40, borderRadius: 13, alignItems: "center", justifyContent: "center" },
+  quickLabel: { fontSize: 14, fontFamily: "Inter_600SemiBold", color: "#0b2b3b" },
+  quickSub: { fontSize: 11, fontFamily: "Inter_400Regular", color: "#7a9ab8" },
 
-  // Section & timeline
-  sectionTitle: {
-    fontSize: 17,
-    fontFamily: "Inter_700Bold",
-    color: "#0b2b3b",
-    marginHorizontal: 20,
-    marginBottom: 12,
-    letterSpacing: -0.2,
+  sectionHeader: {
+    flexDirection: "row", alignItems: "center", justifyContent: "space-between",
+    marginHorizontal: 20, marginBottom: 12,
   },
-  timelineWrap: { marginHorizontal: 18, marginBottom: 10 },
-  timelineCard: { flexDirection: "row", alignItems: "center", gap: 12 },
-  timelineDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: "#2c7cb6",
-    shadowColor: "#2c7cb6",
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.4,
-    shadowRadius: 6,
-    elevation: 2,
-  },
-  timelineTitle: { fontSize: 14, fontFamily: "Inter_600SemiBold", color: "#0b2b3b" },
-  timelineSub: { fontSize: 11, fontFamily: "Inter_400Regular", color: "#4a7090", flex: 1 },
-  timelineDate: { fontSize: 11, fontFamily: "Inter_400Regular", color: "#7a9ab8", marginTop: 3 },
+  sectionTitle: { fontSize: 17, fontFamily: "Inter_700Bold", color: "#0b2b3b", letterSpacing: -0.2 },
+  sectionLink: { fontSize: 13, fontFamily: "Inter_500Medium", color: ACCENT },
+
+  dossierWrap: { marginHorizontal: 18, marginBottom: 10 },
+  dossierCard: { flexDirection: "row", alignItems: "center", overflow: "hidden" },
+  dossierAccent: { width: 4, alignSelf: "stretch", borderRadius: 4 },
+  dossierContent: { flex: 1, paddingVertical: 14, paddingHorizontal: 14, gap: 6 },
+  dossierTop: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  dossierNum: { fontSize: 14, fontFamily: "Inter_700Bold", color: "#0b2b3b" },
+  dossierBottom: { flexDirection: "row", alignItems: "center", gap: 5 },
+  dossierLieu: { fontSize: 12, fontFamily: "Inter_400Regular", color: "#4a7090", flex: 1 },
+  dossierDate: { fontSize: 11, fontFamily: "Inter_400Regular", color: "#9ab0c8" },
+
   emptyCard: { marginHorizontal: 18, alignItems: "center", gap: 10 },
-  emptyText: { fontSize: 14, fontFamily: "Inter_400Regular", color: "#7a9ab8" },
+  emptyTitle: { fontSize: 15, fontFamily: "Inter_600SemiBold", color: "#4a7090" },
+  emptySub: { fontSize: 12, fontFamily: "Inter_400Regular", color: "#9ab0c8" },
 });
